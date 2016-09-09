@@ -1,0 +1,28 @@
+{
+	"version": "1.0.0-*",
+	"authors": [ "Alexander Fomin" ],
+	"description": "Matrix route parameters support for ASP.NET Core MVC",
+
+	"buildOptions": {
+		"warningsAsErrors": true,
+		"xmlDoc": true,
+		"nowarn": [ "CS1591", "CS1573" ]
+	},
+
+	"packOptions": {
+		"tags": [ "aspnetcore", "route", "matrix", "parameters" ],
+		"repository": {
+			"type": "git",
+			"url": "git://github.com/anfomin/aspnetcore.mvc.matrixparameters"
+		}
+	},
+
+	"dependencies": {
+		"Microsoft.AspNetCore.Mvc.Core": "1.0.0"
+	},
+
+	"frameworks": {
+		"net451": { },
+		"netstandard1.6": { }
+	}
+}
