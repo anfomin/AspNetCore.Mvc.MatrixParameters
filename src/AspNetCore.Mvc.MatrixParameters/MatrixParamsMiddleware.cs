@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
@@ -13,6 +14,7 @@ namespace AspNetCore.Mvc.MatrixParameters
 	public class MatrixParamsMiddleware
 	{
 		readonly RequestDelegate _next;
+		readonly Regex _outletsRegex = new Regex(@"(\([^)]+\))*$", RegexOptions.Compiled);
 
 		public MatrixParamsMiddleware(RequestDelegate next)
 		{
@@ -23,11 +25,22 @@ namespace AspNetCore.Mvc.MatrixParameters
 
 		public async Task Invoke(HttpContext context)
 		{
-			string remainingPath;
-			var matrixParams = Parse(context.Request.Path, out remainingPath);
+			string remainingPath = RemoveOutlets(context.Request.Path);
+			var matrixParams = Parse(remainingPath, out remainingPath);
 			context.Request.Path = remainingPath;
 			context.Features.Set<IMatrixFeature>(new MatrixFeature(matrixParams));
 			await _next(context);
+		}
+
+		/// <summary>
+		/// Removed outlets from the request path.
+		/// </summary>
+		protected virtual string RemoveOutlets(string path)
+		{
+			var match = _outletsRegex.Match(path);
+			if (!match.Success)
+				return path;
+			return path.Substring(0, match.Index);
 		}
 
 		/// <summary>
