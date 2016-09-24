@@ -40,10 +40,12 @@ namespace Microsoft.AspNetCore.Mvc
 		/// <param name="controller">The name of the controller.</param>
 		/// <param name="values">An object that contains route values.</param>
 		/// <param name="matrixValues">An object that contains route matrix values.</param>
+		/// <param name="protocol">The protocol for the URL, such as "http" or "https".</param>
+		/// <param name="host">The host name for the URL.</param>
 		/// <returns>The generated URL.</returns>
-		public static string Action(this IUrlHelper helper, string action, string controller, object values, object matrixValues)
+		public static string Action(this IUrlHelper helper, string action, string controller, object values, object matrixValues, string protocol = null, string host = null)
 		{
-			string url = helper.Action(action, controller, values);
+			string url = helper.Action(action, controller, values, protocol, host);
 			if (matrixValues != null)
 				return AddMatrixParams(url, matrixValues);
 			return url;
