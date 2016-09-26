@@ -46,7 +46,7 @@ namespace Microsoft.AspNetCore.Mvc
 		public static string Action(this IUrlHelper helper, string action, string controller, object values, object matrixValues, string protocol = null, string host = null)
 		{
 			string url = helper.Action(action, controller, values, protocol, host);
-			if (matrixValues != null)
+			if (url != null && matrixValues != null)
 				return AddMatrixParams(url, matrixValues);
 			return url;
 		}
@@ -74,7 +74,7 @@ namespace Microsoft.AspNetCore.Mvc
 		public static string RouteUrl(this IUrlHelper helper, string routeName, object values, object matrixValues)
 		{
 			string url = helper.RouteUrl(routeName, values);
-			if (matrixValues != null)
+			if (url != null && matrixValues != null)
 				return AddMatrixParams(url, matrixValues);
 			return url;
 		}
