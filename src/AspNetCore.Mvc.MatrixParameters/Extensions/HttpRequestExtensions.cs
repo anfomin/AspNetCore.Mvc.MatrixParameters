@@ -1,3 +1,4 @@
+using System;
 using AspNetCore.Mvc.MatrixParameters;
 
 namespace Microsoft.AspNetCore.Http
@@ -10,7 +11,10 @@ namespace Microsoft.AspNetCore.Http
 		public static IQueryCollection GetMatrix(this HttpRequest request)
 		{
 			var feature = request.HttpContext.Features.Get<IMatrixFeature>();
-			return feature?.MatrixParams;
+			if (feature == null)
+				throw new InvalidOperationException("IMatrixFeature is not registered. Add \"app.UseMatrixParams()\" to the application pipeline.");
+
+			return feature.MatrixParams;
 		}
 	}
 }
