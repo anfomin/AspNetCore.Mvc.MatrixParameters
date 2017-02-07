@@ -25,9 +25,10 @@ namespace AspNetCore.Mvc.MatrixParameters
 
 		public async Task Invoke(HttpContext context)
 		{
-			string remainingPath = RemoveOutlets(context.Request.Path);
-			var matrixParams = Parse(remainingPath, out remainingPath);
-			context.Request.Path = remainingPath;
+			string pathWithoutMatrixParams = RemoveOutlets(context.Request.Path);
+			var matrixParams = Parse(pathWithoutMatrixParams, out pathWithoutMatrixParams);
+
+			context.Request.Path = pathWithoutMatrixParams;
 			context.Features.Set<IMatrixFeature>(new MatrixFeature(matrixParams));
 			await _next(context);
 		}
@@ -47,28 +48,41 @@ namespace AspNetCore.Mvc.MatrixParameters
 		/// Parses request path into matrix parameters.
 		/// </summary>
 		/// <param name="path">Request path.</param>
-		/// <param name="remaining">Request path without matrix parameters.</param>
-		/// <returns>Matrix parameters.</returns>
-		protected virtual IQueryCollection Parse(string path, out string remaining)
+		/// <param name="pathWithoutMatrixParams">Request path without matrix parameters.</param>
+		/// <returns>Matrix parameters for the last path part.</returns>
+		protected virtual IQueryCollection Parse(string path, out string pathWithoutMatrixParams)
 		{
-			// get path last part
-			int slashIndex = path.LastIndexOf('/');
-			string part;
-			if (slashIndex == -1)
+			MatrixCollection matrix = null;
+			string[] parts = path.Split('/');
+			for (int i = 0; i < parts.Length; i++)
 			{
-				part = path;
-				remaining = "";
-			}
-			else
-			{
-				part = path.Substring(slashIndex + 1);
-				remaining = path.Substring(0, slashIndex + 1);
+				string part = parts[i];
+				matrix = GetMatrixParams(part, out part);
+				parts[i] = part;
 			}
 
-			// get matrix parameters
+			pathWithoutMatrixParams = String.Join("/", parts);
+			return matrix ?? new MatrixCollection();
+		}
+
+		/// <summary>
+		/// Returns matrix parameters for path part.
+		/// </summary>
+		/// <param name="part">Path part between '/'.</param>
+		/// <param name="remaining">Path part without matrix parameters.</param>
+		/// <returns>Matrix parameters for the path part.</returns>
+		MatrixCollection GetMatrixParams(string part, out string remaining)
+		{
+			if (string.IsNullOrEmpty(part))
+			{
+				remaining = part;
+				return null;
+			}
+
 			string[] items = part.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-			if (items.Length > 0)
-				remaining += items[0];
+			remaining = items[0];
+			if (items.Length == 1)
+				return null;
 
 			var pars = new Dictionary<string, StringValues>();
 			for (int i = 1; i < items.Length; i++)
